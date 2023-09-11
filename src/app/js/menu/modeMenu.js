@@ -1,5 +1,7 @@
+const ontogptMode = require("../../../webvowl/js/modules/ontogptMode");
 /**
  * Contains the logic for connecting the modes with the website.
+ * addFormContainer is implemented for OntoGPT mode.
  *
  * @param graph the graph that belongs to these controls
  * @returns {{}}
@@ -46,6 +48,7 @@ module.exports = function ( graph ){
     addCheckBoxD("labelWidth", "Dynamic label width", "#dynamicLabelWidth", graph.options().dynamicLabelWidth, 1);
     addCheckBox("editorMode", "Editing ", "#editMode", graph.editorMode);
     addModeItem(pickAndPin, "pickandpin", "Pick & pin", "#pickAndPinOption", false);
+    addFormContainer("ontogptMode", "OntoGPT mode", "#ontogptMode");
     addModeItem(nodeScaling, "nodescaling", "Node scaling", "#nodeScalingOption", true);
     addModeItem(compactNotation, "compactnotation", "Compact notation", "#compactNotationOption", true);
     var container = addModeItem(colorExternals, "colorexternals", "Color externals", "#colorExternalsOption", true);
@@ -111,6 +114,55 @@ module.exports = function ( graph ){
         .attr("style", "font-size:10px;padding-top:3px")
         .text(" (experimental)");
     }
+  }
+
+  // Added to create a container for out new ontogpt mode
+  function addFormContainer(identifier, modeName, selector) {
+    // Select the container element
+    var container = d3.select(selector).append("label").text(modeName);
+
+    // Create a form element
+    var form = container.append("form");
+
+    // Add an input field to the form
+    form.append("input")
+        .attr("id", "ontoinputfile")
+        .attr("type", "text")
+        .attr("placeholder", "Enter input file path");
+
+    form.append("input")
+        .attr("id", "ontotemplate")
+        .attr("type", "text")
+        .attr("placeholder", "Enter ontology template");
+
+    form.append("input")
+        .attr("id", "outputpath")
+        .attr("type", "text")
+        .attr("placeholder", "Enter output path");
+    // Add a submit button to the form
+    form.append("input")
+        .attr("id", "submitOntoInput")
+        .attr("type", "submit")
+        .attr("value", "Submit");
+    // Submit the form
+    d3.select("#submitOntoInput")
+        .on("click", function () {
+          console.log("about to submit");
+          d3.event.preventDefault();
+          var inputFilePath = d3
+              .select("#ontoinputfile")
+              .property("value");
+          var templateName = d3.select("#ontotemplate").property("value");
+          var outputPath = d3.select("#outputpath").property("value");
+          console.log(inputFilePath);
+          console.log(templateName);
+          console.log(outputPath);
+
+          ontogptMode(inputFilePath, templateName, outputPath);
+        })
+        .attr("method", "POST");
+
+    console.log("Form submitted!");
   }
   
   function addModeItem( module, identifier, modeName, selector, updateGraphOnClick ){
